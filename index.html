@@ -223,6 +223,48 @@ textarea.coller.on{display:block;}
 .os button.on{background:var(--text);color:var(--bg);border-color:var(--text);}
 .champ{width:100%;min-height:46px;border-radius:12px;border:1px solid var(--line);background:var(--surface);color:var(--text);padding:0 12px;font-size:15px;font-family:inherit;margin-top:8px;}
 
+/* Actualiser */
+.hd-actions{display:flex;gap:8px;}
+.rafraichir{display:none;align-items:center;gap:10px;background:var(--warn-l);color:var(--text);
+  border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin-bottom:14px;font-size:14px;}
+.rafraichir.on{display:flex;}
+.rafraichir .btn{margin:0;width:auto;min-height:40px;padding:0 14px;font-size:14px;flex:none;}
+.tourne{animation:tourne 1s linear infinite;display:inline-block;}
+@keyframes tourne{to{transform:rotate(360deg);}}
+
+/* Messages */
+.champ-l{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:12px 0 4px;}
+select.champ{appearance:none;-webkit-appearance:none;background-image:linear-gradient(45deg,transparent 50%,var(--muted) 50%),linear-gradient(135deg,var(--muted) 50%,transparent 50%);
+  background-position:calc(100% - 18px) 50%,calc(100% - 13px) 50%;background-size:5px 5px;background-repeat:no-repeat;padding-right:32px;}
+textarea.msg{width:100%;min-height:120px;border-radius:12px;border:1px solid var(--line);background:var(--surface);
+  color:var(--text);padding:12px;font-size:16px;font-family:inherit;resize:vertical;}
+.compteur{text-align:right;font-size:12px;color:var(--muted);margin-top:4px;}
+.compteur.warn{color:var(--warn);font-weight:700;} .compteur.err{color:var(--err);font-weight:700;}
+.dest{display:flex;flex-wrap:wrap;gap:6px;min-height:46px;align-items:center;border:1px solid var(--line);
+  border-radius:12px;padding:6px;background:var(--surface);cursor:pointer;}
+.dest .vide-d{color:var(--muted);font-size:15px;padding:0 6px;}
+.puce-d{background:var(--blue-l);color:var(--blue);border-radius:99px;padding:5px 10px;font-size:14px;font-weight:600;}
+.emo-bas{display:flex;gap:8px;align-items:center;margin-top:8px;}
+.emo-bas .chip{padding:7px 12px;}
+.emojis{display:none;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 10px;margin-top:8px;}
+.emojis.on{display:block;}
+.emojis .fam{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin:6px 2px 2px;}
+.emojis .grille{display:grid;grid-template-columns:repeat(10,1fr);}
+.emojis button{border:0;background:transparent;font-size:24px;min-height:40px;cursor:pointer;border-radius:8px;padding:0;}
+.emojis button:active{background:var(--blue-l);}
+.histo{display:flex;flex-direction:column;gap:8px;}
+.hm{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;}
+.hm .l1{display:flex;justify-content:space-between;gap:8px;font-size:14px;}
+.hm .l2{font-size:14px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.etat-m{font-size:12px;font-weight:700;white-space:nowrap;}
+.etat-m.att{color:var(--warn);} .etat-m.dep{color:var(--ok);}
+.a-deposer{display:none;}
+.a-deposer.on{display:block;}
+.sel-l{display:flex;align-items:center;gap:12px;padding:12px 4px;border-bottom:1px solid var(--line);cursor:pointer;}
+.sel-l input{width:22px;height:22px;accent-color:var(--blue);flex:none;}
+.sel-l .n{flex:1;min-width:0;font-weight:600;}
+.sel-l .e{font-size:14px;color:var(--muted);}
+
 /* Barre de navigation */
 nav{
   position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:center;
@@ -293,13 +335,20 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 16px 18p
       <h1>PilotAtelier Mobile</h1>
       <div id="hdEtat">Aucune donnée — touchez Synchro</div>
     </div>
-    <button class="hd-btn" onclick="basculerTheme()" aria-label="Thème clair ou sombre">🌙</button>
+    <div class="hd-actions">
+      <button class="hd-btn" id="btnActualiser" onclick="actualiser()" aria-label="Actualiser les données">🔄</button>
+      <button class="hd-btn" onclick="basculerTheme()" aria-label="Thème clair ou sombre">🌙</button>
+    </div>
   </div>
 </header>
 
 <main>
   <!-- ═════════ TABLEAU ═════════ -->
   <section class="vue on" id="v-accueil">
+    <div class="rafraichir" id="bandeauAncien">
+      <div style="flex:1" id="bandeauAncienT">Données anciennes</div>
+      <button class="btn" onclick="actualiser()">🔄 Actualiser</button>
+    </div>
     <div class="seg" id="segPeriode">
       <button data-p="jour" onclick="choisirPeriode('jour')">Jour</button>
       <button data-p="semaine" onclick="choisirPeriode('semaine')">Semaine</button>
@@ -375,6 +424,71 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 16px 18p
     <div class="barres deux" id="liste"></div>
   </section>
 
+  <!-- ═════════ MESSAGES ═════════ -->
+  <section class="vue" id="v-msg">
+    <div class="carte a-deposer" id="carteADeposer">
+      <h2>📤 <span id="nbADeposer">0</span> message(s) à déposer</h2>
+      <div class="sous" style="margin-bottom:0">Ils partiront dès qu'ils seront enregistrés dans le dossier OneDrive.</div>
+      <button class="btn" onclick="deposerMessages()">📤 Déposer dans OneDrive</button>
+    </div>
+
+    <div class="carte" id="carteExpediteur">
+      <h2>✍ Expéditeur</h2>
+      <div class="sous">Votre nom apparaît dans le message reçu par le technicien.</div>
+      <label class="champ-l" for="expNom">Nom</label>
+      <input class="champ" id="expNom" type="text" placeholder="ex : Malek Tahri" autocomplete="name">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+        <div><label class="champ-l" for="expCode">N° technicien</label>
+          <input class="champ" id="expCode" type="text" placeholder="ex : 211" autocapitalize="characters"></div>
+        <div><label class="champ-l" for="expRole">Rôle</label>
+          <select class="champ" id="expRole"><option>Référent</option><option>RE</option><option>RA</option><option>DZ</option></select></div>
+      </div>
+      <button class="btn" onclick="enregistrerExpediteur()">Enregistrer</button>
+    </div>
+
+    <div class="carte" id="carteMsg">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2 style="margin:0">💬 Nouveau message</h2>
+        <button class="chip" onclick="modifierExpediteur()" id="expResume">—</button>
+      </div>
+
+      <label class="champ-l">Destinataire(s)</label>
+      <div class="dest" id="destZone" onclick="ouvrirChoixDest()"><span class="vide-d">Touchez pour choisir…</span></div>
+
+      <label class="champ-l" for="msgModele">Modèle</label>
+      <select class="champ" id="msgModele" onchange="appliquerModele()"></select>
+
+      <label class="champ-l" for="msgType">Type</label>
+      <select class="champ" id="msgType"></select>
+
+      <label class="champ-l" for="msgTexte">Message</label>
+      <textarea class="msg" id="msgTexte" maxlength="500" placeholder="Votre message…" oninput="majCompteur()"></textarea>
+      <div class="emo-bas">
+        <button class="chip" onclick="basculerEmojis()" id="btnEmo">🙂 Émojis</button>
+        <button class="chip" onclick="insererTexte('{nom}')">+ prénom</button>
+        <div class="compteur" id="compteur" style="flex:1">0 / 500</div>
+      </div>
+      <div class="emojis" id="emojis"></div>
+      <div class="note">« {nom} » est remplacé par le prénom de chaque destinataire.</div>
+      <button class="btn" onclick="envoyerMessage()">📤 Envoyer</button>
+    </div>
+
+    <div class="carte">
+      <h2>🕘 Envoyés depuis ce téléphone</h2>
+      <div class="histo" id="histo"></div>
+    </div>
+
+    <details class="carte">
+      <summary>Comment le message arrive au technicien</summary>
+      <ol class="etapes">
+        <li>Touchez <b>Envoyer</b> : le menu de partage s'ouvre.</li>
+        <li><b>iPhone</b> : <b>Enregistrer dans Fichiers</b> → OneDrive → <b>SuiviEfficience_Tech</b> → <b>Enregistrer</b> (puis <b>Remplacer</b> si demandé).<br>
+            <b>Android</b> : <b>OneDrive</b> → dossier <b>SuiviEfficience_Tech</b> → <b>Charger</b>.</li>
+        <li>À sa prochaine synchro, le PC de l'atelier lit le fichier et affiche le message au technicien, comme un message envoyé depuis le PC.</li>
+      </ol>
+    </details>
+  </section>
+
   <!-- ═════════ SYNCHRO ═════════ -->
   <section class="vue" id="v-sync">
     <div class="carte">
@@ -392,6 +506,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 16px 18p
       <h2>📂 Fichier PilotAtelier_Mobile.json</h2>
       <div class="sous">Les PC de l'atelier tiennent ce fichier à jour tout seuls dans le dossier OneDrive, à chaque synchro (version PC V8.5). Un seul fichier à choisir, rien à préparer.</div>
       <button class="btn" onclick="choisirFichierMobile()">📂 Ouvrir PilotAtelier_Mobile.json</button>
+      <div class="note">Ensuite, le bouton <b>🔄</b> en haut de l'écran suffit pour récupérer les nouvelles données, depuis n'importe quel écran.</div>
       <div class="note">Première fois : OneDrive → dossier <span class="mono">SuiviEfficience_Tech</span> → <span class="mono">PilotAtelier_Mobile.json</span>. Ensuite il apparaît dans <b>Récents</b>.</div>
       <button class="btn sec" onclick="ouvrirMiseEnPlace()">🚀 Mise en place guidée</button>
     </div>
@@ -421,6 +536,7 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 16px 18p
 <nav><div class="in">
   <button class="on" data-vue="accueil" onclick="aller('accueil')"><span class="ic">◉</span>Tableau</button>
   <button data-vue="techs" onclick="aller('techs')"><span class="ic">👥</span>Techniciens</button>
+  <button data-vue="msg" onclick="aller('msg')"><span class="ic">💬</span>Messages</button>
   <button data-vue="sync" onclick="aller('sync')"><span class="ic">⇅</span>Synchro</button>
 </div></nav>
 
@@ -430,12 +546,12 @@ footer{text-align:center;color:var(--muted);font-size:12px;padding:10px 16px 18p
 
 <div class="toast" id="toast"></div>
 
-<footer>PilotAtelier Mobile · V2.2 · Référent Bezons<br>© 2026 Malek Tahri</footer>
+<footer>PilotAtelier Mobile · V2.3 · Référent Bezons<br>© 2026 Malek Tahri</footer>
 
 <script>
 'use strict';
 /* ============================================================
-   PilotAtelier Mobile V2.2 — consultation sur smartphone/tablette
+   PilotAtelier Mobile V2.3 — consultation sur smartphone/tablette
    Lit les fichiers efficience_CODE.json du dossier OneDrive :
    - PilotAtelier_Mobile.json, tenu à jour par les PC (V8.5)
    - dans une archive .zip (dossier compressé dans Fichiers)
@@ -643,7 +759,9 @@ function appliquerLot(lot, source){
   sauver();
   rendreTout();
   toast('✓ ' + lot.fichiers + ' fichier(s) · ' + codes.length + ' technicien(s)', 'ok');
-  aller('accueil');
+  const vueOn = document.querySelector('.vue.on');
+  if(!vueOn || vueOn.id === 'v-sync') aller('accueil');
+  else if(vueOn.id === 'v-msg') rendreMessages();
   return true;
 }
 
@@ -663,6 +781,7 @@ async function fichiersChoisis(ev){
     .filter(f => /\.(json|zip|txt)$/i.test(f.name || '') || !f.name);
   if(ev.target) ev.target.value = '';
   if(!liste.length){ toast('Aucun fichier efficience_….json trouvé', 'err'); return; }
+  const avant = D.majDonnees;
   toast('Lecture en cours…');
   const lot = nouveauLot();
   for(const f of liste){
@@ -678,7 +797,7 @@ async function fichiersChoisis(ev){
       }
     }catch(e){ toast(e.message || 'Fichier illisible', 'err'); }
   }
-  appliquerLot(lot, 'ces fichiers');
+  if(appliquerLot(lot, 'ces fichiers')) signalerNouveaute(avant);
 }
 
 function effacerTout(){
@@ -744,6 +863,7 @@ function aller(v){
   document.querySelectorAll('.vue').forEach(s => s.classList.toggle('on', s.id === 'v-' + v));
   document.querySelectorAll('nav button').forEach(b => b.classList.toggle('on', b.dataset.vue === v));
   window.scrollTo(0, 0);
+  if(v === 'msg') rendreMessages();
 }
 function choisirPeriode(p){
   PERIODE = p;
@@ -912,7 +1032,15 @@ function rendreListe(){
     : '<div class="vide">' + (Object.keys(D.techs).length ? 'Aucun technicien ne correspond' : 'Aucune donnée — ouvrez Synchro') + '</div>';
 }
 
-function rendreTout(){ rendreEntete(); rendreAccueil(); rendreListe(); }
+function rendreBandeauAncien(){
+  const b = document.getElementById('bandeauAncien');
+  const ref = D.majDonnees || D.maj;
+  const h = ref ? (Date.now() - Date.parse(ref)) / 3600000 : null;
+  const vieux = h !== null && h >= 3;
+  b.classList.toggle('on', vieux);
+  if(vieux) document.getElementById('bandeauAncienT').innerHTML = 'Données de <b>' + echap(depuis(ref).replace('il y a ', '')) + '</b>';
+}
+function rendreTout(){ rendreEntete(); rendreAccueil(); rendreListe(); rendreBandeauAncien(); }
 
 /* ──────── Fiche technicien ──────── */
 function ouvrirFiche(code){
@@ -926,6 +1054,7 @@ function ouvrirFiche(code){
       '<div class="t"><b>' + echap(t.nom) + '</b><span class="mono">' + echap(code) + '</span>' +
       (t.pause || t.absence ? ' · <span style="color:var(--warn)">' + echap(t.absence || 'en pause') + '</span>' : '') + '</div>' +
       '<button class="x" onclick="fermerFeuille()" aria-label="Fermer">✕</button></div>' +
+    '<button class="btn" style="margin:0 0 14px" onclick="messageA(\'' + echap(code) + '\')">💬 Envoyer un message</button>' +
     '<div class="mini">' + mini('Semaine', ss) + mini('Mois', sm) + mini('Mois préc.', sp) + '</div>' +
     (PERIODE !== 'jour' ? '<div class="carte"><h2>Jour par jour</h2><div class="sous">' + echap(b.lib) + '</div>' + graphJours([code], PERIODE) + '</div>' : '') +
     '<div class="lignes">' +
@@ -964,7 +1093,7 @@ async function installerAppli(){
     ouvrirMiseEnPlace(OS_VU);
   } else toast('Menu ⋮ de Chrome → « Ajouter à l\'écran d\'accueil »');
 }
-function choisirFichierMobile(){ fermerFeuille(); document.getElementById('fichiers').click(); }
+function choisirFichierMobile(){ fermerFeuille(); actualiser(true); }
 
 function etapeHTML(n, fait, titre, desc, boutons){
   return '<div class="etape' + (fait ? ' fait' : '') + '"><div class="no">' + (fait ? '✓' : n) + '</div>' +
@@ -1022,9 +1151,336 @@ function partagerMiseEnPlace(){
   }catch(e){}
 })();
 
+/* ══════════ ACTUALISER EN UN TOUCHER ══════════
+   Chrome (Android, PC) : le fichier choisi une fois est mémorisé,
+   🔄 le relit directement. Safari (iPhone) ne sait pas relire un
+   fichier seul : 🔄 ouvre directement le sélecteur, où le fichier
+   est en tête des récents. */
+const IDB_PAM = 'pam2_fichier';
+function _idb(){
+  return new Promise((ok, ko) => {
+    const rq = indexedDB.open(IDB_PAM, 1);
+    rq.onupgradeneeded = () => rq.result.createObjectStore('h');
+    rq.onsuccess = () => ok(rq.result); rq.onerror = () => ko(rq.error);
+  });
+}
+async function _poignee(v){
+  try{
+    const db = await _idb();
+    return await new Promise((ok, ko) => {
+      const tx = db.transaction('h', v === undefined ? 'readonly' : 'readwrite');
+      const st = tx.objectStore('h');
+      const rq = v === undefined ? st.get('f') : (v === null ? st.delete('f') : st.put(v, 'f'));
+      rq.onsuccess = () => ok(rq.result); rq.onerror = () => ko(rq.error);
+    });
+  }catch(e){ return null; }
+}
+let _actuEnCours = false;
+function _etatActu(on){
+  _actuEnCours = on;
+  const b = document.getElementById('btnActualiser');
+  b.innerHTML = on ? '<span class="tourne">🔄</span>' : '🔄';
+}
+async function _lireUnFichier(f){
+  const lot = nouveauLot();
+  const buf = await f.arrayBuffer();
+  const u8 = new Uint8Array(buf, 0, Math.min(4, buf.byteLength));
+  if(u8[0] === 0x50 && u8[1] === 0x4b){
+    (await lireZip(buf)).forEach(t => extraireObjets(t).forEach(o => { lot.fichiers++; verserObjet(lot, o); }));
+  } else extraireObjets(new TextDecoder('utf-8').decode(buf)).forEach(o => { lot.fichiers++; verserObjet(lot, o); });
+  return lot;
+}
+async function actualiser(choisir){
+  if(_actuEnCours) return;
+  const avant = D.majDonnees;
+  if(window.showOpenFilePicker){
+    try{
+      let h = choisir ? null : await _poignee();
+      if(h){
+        const p = await h.queryPermission({ mode:'read' });
+        if(p !== 'granted' && (await h.requestPermission({ mode:'read' })) !== 'granted') h = null;
+      }
+      if(!h){
+        [h] = await window.showOpenFilePicker({ multiple:false,
+          types:[{ description:'PilotAtelier', accept:{ 'application/json':['.json'], 'application/zip':['.zip'] } }] });
+        await _poignee(h);
+      }
+      _etatActu(true);
+      const lot = await _lireUnFichier(await h.getFile());
+      _etatActu(false);
+      if(appliquerLot(lot, h.name)) signalerNouveaute(avant);
+      return;
+    }catch(e){
+      _etatActu(false);
+      if(e && e.name === 'AbortError') return;
+      await _poignee(null);       // poignée devenue invalide : on repassera par le sélecteur
+    }
+  }
+  document.getElementById('fichiers').click();
+}
+function signalerNouveaute(avant){
+  if(!avant || !D.majDonnees) return;
+  setTimeout(() => {
+    toast(Date.parse(D.majDonnees) > Date.parse(avant)
+      ? '✓ Nouvelles données · déposées ' + depuis(D.majDonnees)
+      : 'Aucune nouveauté depuis la dernière fois · ' + depuis(D.majDonnees),
+      Date.parse(D.majDonnees) > Date.parse(avant) ? 'ok' : '');
+  }, 1200);
+}
+
+/* ══════════ MESSAGES ══════════
+   Même format que la version PC (clé __MESSAGES). Le téléphone les
+   dépose dans un fichier « efficience_<CODE>_mobile.json » : les PC
+   le lisent avec les autres et fusionnent les messages. Le fichier
+   reprend tous les messages des 30 derniers jours, il peut donc être
+   remplacé sans rien perdre. */
+const K_EXP = 'pam2_expediteur';
+const K_MSG = 'pam2_messages';
+const MAX_MSG = 500;
+const TYPES_MSG = [
+  { v:'encouragement', l:'👏 Encouragement' }, { v:'felicitations', l:'🎉 Félicitations' },
+  { v:'information', l:'ℹ Information' },      { v:'saisie', l:'📝 Rappel de saisie' },
+  { v:'sync', l:'🔄 Rappel de synchronisation' }, { v:'serie', l:'🔎 Rappel numéro de série' },
+  { v:'appel', l:'☎ Rappel appel client' },    { v:'consigne', l:'📋 Consigne atelier' },
+  { v:'autre', l:'✉ Autre' }
+];
+const MODELES_MSG = [
+  { l:'✍ Message personnalisé', t:'', x:'' },
+  { l:'🎉 Félicitations pour les résultats', t:'felicitations', x:'Bravo {nom} ! Tes résultats de ce mois sont excellents, continue comme ça. 🏆' },
+  { l:'👏 Progression encourageante', t:'encouragement', x:'Bonjour {nom}, tes résultats progressent bien ce mois-ci. Continue sur cette lancée ! 💪' },
+  { l:'👏 Encouragement — passage difficile', t:'encouragement', x:'Bonjour {nom}, le mois est un peu compliqué. N\'hésite pas à me solliciter si tu rencontres des difficultés, on regardera ensemble. 🤝' },
+  { l:'📝 Rappel de saisie', t:'saisie', x:'Bonjour {nom}, pense à saisir tes journées dans PilotAtelier : sans saisie, tes résultats ne remontent pas. 📝' },
+  { l:'🔄 Rappel de synchronisation', t:'sync', x:'Bonjour {nom}, pense à vérifier le bandeau de synchronisation en haut de la saisie : si le partage n\'est pas autorisé, tes saisies ne me parviennent pas.' },
+  { l:'🔎 Rappel numéro de série', t:'serie', x:'Bonjour {nom}, merci de bien penser à contrôler et renseigner le numéro de série des appareils : cette information est obligatoire pour le constructeur. 🔎' },
+  { l:'☎ Rappel appel client', t:'appel', x:'Bonjour {nom}, un retour de moins d\'un mois nécessite un appel client. Merci de le traiter dès que possible. ☎' }
+];
+const EMOJIS = [
+  { t:'Encourager', l:['👏','💪','👍','🙌','✨','🔥','⭐','🚀','🎯','💯'] },
+  { t:'Féliciter',  l:['🏆','🥇','🎉','🎊','🌟','🥳','🎖','😎','🤩','👑'] },
+  { t:'Atelier',    l:['🔧','🔩','⚙','🧰','🧯','☕','🧹','🧽','📦','🔌'] },
+  { t:'Repères',    l:['✅','❗','⚠','📅','⏱','📈','📉','📝','🔎','💡'] },
+  { t:'Humeur',     l:['🙂','😀','😉','🤝','🙏','❤','☀','🌧','😅','🤔'] }
+];
+let DEST = [];
+
+function lireJSON(k, def){ try{ return JSON.parse(localStorage.getItem(k) || 'null') || def; }catch(e){ return def; } }
+function ecrireJSON(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); return true; }catch(e){ toast('Mémoire du téléphone pleine', 'err'); return false; } }
+function expediteur(){ return lireJSON(K_EXP, null); }
+function messagesLocaux(){ return lireJSON(K_MSG, {}); }
+function codeSur(c){ return String(c || '').trim().toUpperCase().replace(/[^A-Z0-9_-]/g, ''); }
+
+function enregistrerExpediteur(){
+  const nom = document.getElementById('expNom').value.trim();
+  const code = codeSur(document.getElementById('expCode').value);
+  const role = document.getElementById('expRole').value;
+  if(!nom){ toast('Indiquez votre nom', 'err'); return; }
+  if(!code){ toast('Indiquez votre n° technicien', 'err'); return; }
+  ecrireJSON(K_EXP, { nom, code, role });
+  rendreMessages();
+  toast('Expéditeur enregistré', 'ok');
+}
+function modifierExpediteur(){
+  const e = expediteur() || {};
+  document.getElementById('expNom').value = e.nom || '';
+  document.getElementById('expCode').value = e.code || '';
+  document.getElementById('expRole').value = e.role || 'Référent';
+  document.getElementById('carteExpediteur').style.display = '';
+  document.getElementById('carteMsg').style.display = 'none';
+}
+
+function initComposeur(){
+  document.getElementById('msgType').innerHTML = TYPES_MSG.map(t => '<option value="' + t.v + '">' + t.l + '</option>').join('');
+  document.getElementById('msgModele').innerHTML = MODELES_MSG.map((m, i) => '<option value="' + i + '">' + echap(m.l) + '</option>').join('');
+  document.getElementById('emojis').innerHTML = EMOJIS.map(f =>
+    '<div class="fam">' + f.t + '</div><div class="grille">' +
+    f.l.map(e => '<button type="button" onclick="insererTexte(\'' + e + '\')">' + e + '</button>').join('') + '</div>').join('');
+}
+function appliquerModele(){
+  const m = MODELES_MSG[+document.getElementById('msgModele').value] || MODELES_MSG[0];
+  if(m.t) document.getElementById('msgType').value = m.t;
+  document.getElementById('msgTexte').value = m.x;
+  majCompteur();
+}
+function basculerEmojis(){
+  const z = document.getElementById('emojis');
+  z.classList.toggle('on');
+  document.getElementById('btnEmo').classList.toggle('on', z.classList.contains('on'));
+}
+function insererTexte(s){
+  const t = document.getElementById('msgTexte');
+  const a = t.selectionStart != null ? t.selectionStart : t.value.length;
+  const b = t.selectionEnd != null ? t.selectionEnd : t.value.length;
+  const nv = t.value.slice(0, a) + s + t.value.slice(b);
+  if(nv.length > MAX_MSG){ toast('500 caractères maximum', 'err'); return; }
+  t.value = nv;
+  t.selectionStart = t.selectionEnd = a + s.length;
+  majCompteur();
+}
+function majCompteur(){
+  const n = document.getElementById('msgTexte').value.length;
+  const c = document.getElementById('compteur');
+  c.textContent = n + ' / ' + MAX_MSG;
+  c.className = 'compteur' + (n >= MAX_MSG ? ' err' : n >= MAX_MSG * .85 ? ' warn' : '');
+}
+function prenom(code){ const n = (D.techs[code] || {}).nom || code; return n.split(' ')[0] || n; }
+
+/* Choix des destinataires */
+function ouvrirChoixDest(){
+  const L = lignes('mois').sort((a, b) => a.nom.localeCompare(b.nom, 'fr'));
+  if(!L.length){ toast('Ouvrez d\'abord le fichier de l\'atelier (🔄)', 'err'); return; }
+  const sel = new Set(DEST);
+  document.getElementById('feuilleC').innerHTML =
+    '<div class="poignee"></div>' +
+    '<div class="f-h"><div class="t"><b>Destinataires</b><span id="nbSel">' + sel.size + ' sélectionné(s)</span></div>' +
+    '<button class="x" onclick="validerDest()" aria-label="Valider">✓</button></div>' +
+    '<div class="filtres">' +
+      '<button class="chip" onclick="selRapide(\'tous\')">Tous</button>' +
+      '<button class="chip" onclick="selRapide(\'bas\')">Sous 80 %</button>' +
+      '<button class="chip" onclick="selRapide(\'haut\')">≥ 90 %</button>' +
+      '<button class="chip" onclick="selRapide(\'sans\')">Sans saisie</button>' +
+      '<button class="chip" onclick="selRapide(\'aucun\')">Aucun</button></div>' +
+    '<input class="recherche" style="width:100%;margin-bottom:6px" type="search" placeholder="🔎 Nom ou code…" oninput="filtrerDest(this.value)">' +
+    '<div id="listeDest">' + L.map(x =>
+      '<label class="sel-l" data-q="' + echap((x.nom + ' ' + x.code).toLowerCase()) + '">' +
+      '<input type="checkbox" value="' + echap(x.code) + '"' + (sel.has(x.code) ? ' checked' : '') + ' onchange="compterDest()">' +
+      '<span class="n">' + echap(x.nom) + ' <span class="mono" style="color:var(--muted)">' + echap(x.code) + '</span></span>' +
+      '<span class="e">' + (x.s.eff === null ? '—' : x.s.eff + ' %') + '</span></label>').join('') + '</div>' +
+    '<button class="btn" onclick="validerDest()">Valider</button>';
+  document.getElementById('feuille').classList.add('on');
+}
+function filtrerDest(q){
+  q = (q || '').toLowerCase();
+  document.querySelectorAll('#listeDest .sel-l').forEach(l => { l.style.display = l.dataset.q.indexOf(q) >= 0 ? '' : 'none'; });
+}
+function compterDest(){
+  document.getElementById('nbSel').textContent = document.querySelectorAll('#listeDest input:checked').length + ' sélectionné(s)';
+}
+function selRapide(f){
+  const M = {}; lignes('mois').forEach(x => M[x.code] = x);
+  document.querySelectorAll('#listeDest input').forEach(i => {
+    const x = M[i.value];
+    i.checked = f === 'tous' ? true : f === 'aucun' ? false
+      : f === 'bas' ? (!x.pause && x.s.eff !== null && x.s.eff < 80)
+      : f === 'haut' ? (!x.pause && x.s.eff !== null && x.s.eff >= 90)
+      : (!x.pause && x.s.eff === null);
+  });
+  compterDest();
+}
+function validerDest(){
+  DEST = Array.from(document.querySelectorAll('#listeDest input:checked')).map(i => i.value);
+  fermerFeuille();
+  rendreDest();
+}
+function rendreDest(){
+  const z = document.getElementById('destZone');
+  z.innerHTML = DEST.length
+    ? DEST.slice(0, 6).map(c => '<span class="puce-d">' + echap((D.techs[c] || {}).nom || c) + '</span>').join('') +
+      (DEST.length > 6 ? '<span class="puce-d">+ ' + (DEST.length - 6) + '</span>' : '')
+    : '<span class="vide-d">Touchez pour choisir…</span>';
+}
+function messageA(code){
+  fermerFeuille();
+  DEST = [code];
+  aller('msg');
+  rendreMessages();
+  setTimeout(() => document.getElementById('msgTexte').focus(), 200);
+}
+
+/* Envoi : crée un message par destinataire puis ouvre le dépôt */
+function envoyerMessage(){
+  const e = expediteur();
+  if(!e){ modifierExpediteur(); toast('Renseignez d\'abord l\'expéditeur', 'err'); return; }
+  const brut = document.getElementById('msgTexte').value.trim();
+  if(!DEST.length){ toast('Choisissez au moins un destinataire', 'err'); return; }
+  if(!brut){ toast('Le message est vide', 'err'); return; }
+  const type = document.getElementById('msgType').value || 'encouragement';
+  const msgs = messagesLocaux();
+  const maintenant = new Date().toISOString();
+  DEST.forEach(c => {
+    const id = 'msg_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8);
+    msgs[id] = { id, destinataire:c, expediteur:e.nom, role:e.role, date:maintenant, savedAt:maintenant,
+                 type, texte: brut.replace(/\{nom\}/gi, prenom(c)).slice(0, MAX_MSG), lu:false,
+                 source:'mobile', _depose:null };
+  });
+  if(!ecrireJSON(K_MSG, msgs)) return;
+  const n = DEST.length;
+  DEST = [];
+  document.getElementById('msgTexte').value = '';
+  document.getElementById('msgModele').value = '0';
+  majCompteur(); rendreDest(); rendreMessages();
+  deposerMessages(n);
+}
+
+/* Fichier à déposer : tous les messages de ce téléphone des 30 derniers jours */
+function fichierMessages(){
+  const e = expediteur(), msgs = messagesLocaux();
+  const limite = Date.now() - 30 * 86400000;
+  const out = {};
+  Object.keys(msgs).forEach(id => {
+    const m = msgs[id];
+    if(Date.parse(m.date || 0) < limite) return;
+    const c = Object.assign({}, m); delete c._depose;
+    out[id] = c;
+  });
+  const contenu = { __PROPRIETAIRE: e.code, __MAJ: new Date().toISOString(), __MESSAGES: out };
+  const nom = 'efficience_' + e.code + '_mobile.json';
+  return { nom, texte: JSON.stringify(contenu), nb: Object.keys(out).length };
+}
+function marquerDeposes(){
+  const msgs = messagesLocaux(), t = new Date().toISOString();
+  Object.keys(msgs).forEach(id => { if(!msgs[id]._depose) msgs[id]._depose = t; });
+  ecrireJSON(K_MSG, msgs);
+  rendreMessages();
+}
+function deposerMessages(nbNouveaux){
+  const e = expediteur();
+  if(!e){ modifierExpediteur(); return; }
+  const f = fichierMessages();
+  const fichier = new File([f.texte], f.nom, { type:'application/json' });
+  const pret = nbNouveaux ? '✓ ' + nbNouveaux + ' message(s) prêt(s) · ' : '';
+  if(navigator.canShare && navigator.canShare({ files:[fichier] })){
+    navigator.share({ files:[fichier], title:f.nom })
+      .then(() => { marquerDeposes(); toast(pret + 'enregistrez-le dans le dossier OneDrive', 'ok'); })
+      .catch(err => {
+        if(err && err.name === 'AbortError') toast('Dépôt annulé · le message reste « à déposer »');
+        else telecharger(fichier);
+      });
+  } else telecharger(fichier, pret);
+}
+function telecharger(fichier, pret){
+  const url = URL.createObjectURL(fichier);
+  const a = document.createElement('a');
+  a.href = url; a.download = fichier.name; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 4000);
+  marquerDeposes();
+  toast((pret || '') + 'fichier téléchargé : placez-le dans le dossier OneDrive', 'ok');
+}
+
+function rendreMessages(){
+  const e = expediteur();
+  document.getElementById('carteExpediteur').style.display = e ? 'none' : '';
+  document.getElementById('carteMsg').style.display = e ? '' : 'none';
+  if(e) document.getElementById('expResume').textContent = '✍ ' + e.nom.split(' ')[0] + ' · ' + e.role;
+  rendreDest();
+  const msgs = messagesLocaux();
+  const liste = Object.values(msgs).sort((a, b) => String(b.date).localeCompare(String(a.date)));
+  const att = liste.filter(m => !m._depose).length;
+  document.getElementById('carteADeposer').classList.toggle('on', att > 0 && !!e);
+  document.getElementById('nbADeposer').textContent = att;
+  const ic = {}; TYPES_MSG.forEach(t => ic[t.v] = t.l.split(' ')[0]);
+  document.getElementById('histo').innerHTML = liste.length ? liste.slice(0, 25).map(m =>
+    '<div class="hm"><div class="l1"><b>' + (ic[m.type] || '✉') + ' ' + echap((D.techs[m.destinataire] || {}).nom || m.destinataire) + '</b>' +
+    '<span class="etat-m ' + (m._depose ? 'dep' : 'att') + '">' + (m._depose ? '📤 déposé' : '⏳ à déposer') + '</span></div>' +
+    '<div class="l2">' + echap(m.texte) + '</div>' +
+    '<div class="l2" style="font-size:12px">' + new Date(m.date).toLocaleString('fr-FR', { dateStyle:'short', timeStyle:'short' }) + '</div></div>'
+  ).join('') : '<div class="vide" style="padding:12px">Aucun message envoyé</div>';
+}
+
 /* ──────── Démarrage ──────── */
 charger();
 rendreTout();
+initComposeur();
+rendreMessages();
 (function(){
   const q = new URLSearchParams(location.search);
   if(q.get('setup') === '1'){
@@ -1032,7 +1488,7 @@ rendreTout();
     setTimeout(() => ouvrirMiseEnPlace(), 300);
   }
 })();
-document.addEventListener('visibilitychange', () => { if(!document.hidden) rendreEntete(); });
+document.addEventListener('visibilitychange', () => { if(!document.hidden){ rendreEntete(); rendreBandeauAncien(); } });
 </script>
 </body>
 </html>
